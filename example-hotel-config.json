@@ -1,0 +1,176 @@
+{
+  "enterprise": {
+    "name": "Grand Plaza Hotel",
+    "industry": "hotel",
+    "description": "Luxury hotel chain providing exceptional hospitality and world-class amenities across premier destinations.",
+    "headquarters": "New York, NY, USA",
+    "website": "https://www.grandplazahotel.com",
+    "supportHours": "24/7",
+    "languages": ["English", "Spanish", "French", "German"],
+    "contactInfo": {
+      "phone": "+1-800-GRAND-PLAZA",
+      "email": "reservations@grandplazahotel.com",
+      "whatsapp": "+1-800-GRAND-HELP"
+    }
+  },
+  "apis": [
+    {
+      "name": "Room Availability API",
+      "description": "Real-time room availability and pricing",
+      "baseUrl": "https://api.grandplazahotel.com",
+      "endpoints": [
+        {
+          "name": "check_availability",
+          "path": "/rooms/availability",
+          "method": "GET",
+          "description": "Check room availability for dates",
+          "parameters": [
+            { "name": "checkIn", "type": "date", "required": true, "description": "Check-in date" },
+            { "name": "checkOut", "type": "date", "required": true, "description": "Check-out date" },
+            { "name": "guests", "type": "number", "required": true, "description": "Number of guests" },
+            { "name": "roomType", "type": "string", "required": false, "description": "Preferred room type" }
+          ],
+          "responseFormat": "JSON"
+        },
+        {
+          "name": "get_room_details",
+          "path": "/rooms/{roomId}",
+          "method": "GET",
+          "description": "Get detailed room information",
+          "parameters": [
+            { "name": "roomId", "type": "string", "required": true, "description": "Room ID" }
+          ],
+          "responseFormat": "JSON"
+        }
+      ]
+    },
+    {
+      "name": "Reservation Management API",
+      "description": "Hotel reservation and booking management",
+      "baseUrl": "https://api.grandplazahotel.com",
+      "endpoints": [
+        {
+          "name": "create_reservation",
+          "path": "/reservations",
+          "method": "POST",
+          "description": "Create a new hotel reservation",
+          "parameters": [
+            { "name": "guestName", "type": "string", "required": true, "description": "Guest name" },
+            { "name": "email", "type": "string", "required": true, "description": "Guest email" },
+            { "name": "phone", "type": "string", "required": true, "description": "Guest phone" },
+            { "name": "checkIn", "type": "date", "required": true, "description": "Check-in date" },
+            { "name": "checkOut", "type": "date", "required": true, "description": "Check-out date" },
+            { "name": "roomType", "type": "string", "required": true, "description": "Room type" },
+            { "name": "guests", "type": "number", "required": true, "description": "Number of guests" }
+          ],
+          "responseFormat": "JSON"
+        },
+        {
+          "name": "get_reservation_status",
+          "path": "/reservations/{reservationId}",
+          "method": "GET",
+          "description": "Get reservation status and details",
+          "parameters": [
+            { "name": "reservationId", "type": "string", "required": true, "description": "Reservation ID" }
+          ],
+          "responseFormat": "JSON"
+        }
+      ]
+    }
+  ],
+  "knowledgeBase": {
+    "name": "Grand Plaza Hotel Knowledge Base",
+    "description": "Comprehensive customer support knowledge base for Grand Plaza Hotel",
+    "documents": [
+      {
+        "id": "hotel_info",
+        "title": "Hotel Information",
+        "content": "Grand Plaza Hotel is a luxury hotel chain with properties in major cities worldwide. We offer world-class amenities, exceptional service, and elegant accommodations for business and leisure travelers.",
+        "category": "General",
+        "tags": ["hotel", "luxury", "amenities"]
+      },
+      {
+        "id": "room_types",
+        "title": "Room Types & Amenities",
+        "content": "We offer various room types: Standard Rooms (1 king or 2 queen beds), Deluxe Rooms (larger space with city views), Suites (separate living area), Presidential Suite (luxury accommodations). All rooms include: High-speed WiFi, Flat-screen TV, Mini-bar, Room service, Concierge service, Fitness center access.",
+        "category": "Rooms",
+        "tags": ["rooms", "amenities", "suites"]
+      },
+      {
+        "id": "dining",
+        "title": "Dining Options",
+        "content": "Our hotel features multiple dining options: Main Restaurant (international cuisine, breakfast/lunch/dinner), Rooftop Bar (cocktails and light bites with city views), Room Service (24/7), Coffee Shop (specialty coffee and pastries), Fine Dining Restaurant (upscale dining experience).",
+        "category": "Dining",
+        "tags": ["restaurant", "dining", "room-service"]
+      },
+      {
+        "id": "amenities",
+        "title": "Hotel Amenities",
+        "content": "Hotel Amenities: Fitness Center (24/7 access), Spa & Wellness Center (massage, treatments), Business Center (meeting rooms, conference facilities), Concierge Service (tour bookings, reservations), Valet Parking, Laundry Service, Airport Shuttle (select locations), Pet-Friendly (additional fees apply).",
+        "category": "Amenities",
+        "tags": ["fitness", "spa", "business", "concierge"]
+      },
+      {
+        "id": "booking_policy",
+        "title": "Booking & Cancellation Policy",
+        "content": "Booking Policy: Reservations can be made online, by phone, or through travel agents. Payment: Credit card required at booking. Cancellation Policy: Free cancellation up to 24 hours before check-in. Late cancellation or no-show: One night charge. Group bookings (10+ rooms): Special terms apply.",
+        "category": "Policies",
+        "tags": ["booking", "cancellation", "payment"]
+      },
+      {
+        "id": "checkin_checkout",
+        "title": "Check-in & Check-out",
+        "content": "Check-in: 3:00 PM (early check-in subject to availability). Check-out: 11:00 AM (late check-out available for fee). Express check-in/check-out available via mobile app. ID required at check-in. Credit card for incidentals required.",
+        "category": "Check-in",
+        "tags": ["check-in", "check-out", "express"]
+      },
+      {
+        "id": "loyalty_program",
+        "title": "Grand Rewards Program",
+        "content": "Grand Rewards Program: Earn points for every stay. Membership tiers: Silver (10+ nights), Gold (25+ nights), Platinum (50+ nights). Benefits: Room upgrades, late check-out, free WiFi, bonus points, exclusive offers. Points can be redeemed for free nights, upgrades, and experiences.",
+        "category": "Loyalty",
+        "tags": ["rewards", "points", "membership"]
+      },
+      {
+        "id": "special_services",
+        "title": "Special Services",
+        "content": "Special Services: Wedding planning and venues, Corporate events and meetings, Airport transfers, Tour bookings, Restaurant reservations, Spa treatments, Business services, Accessibility accommodations. Advance booking recommended for special services.",
+        "category": "Services",
+        "tags": ["weddings", "events", "tours", "accessibility"]
+      },
+      {
+        "id": "contact_info",
+        "title": "Contact Information",
+        "content": "24/7 Reservations: +1-800-GRAND-PLAZA, Email: reservations@grandplazahotel.com, WhatsApp: +1-800-GRAND-HELP, Website: www.grandplazahotel.com",
+        "category": "Contact",
+        "tags": ["phone", "email", "support"]
+      }
+    ],
+    "categories": ["General", "Rooms", "Dining", "Amenities", "Policies", "Check-in", "Loyalty", "Services", "Contact"],
+    "searchConfig": {
+      "maxResults": 3,
+      "similarityThreshold": 0.7
+    }
+  },
+  "voiceAgent": {
+    "name": "Grand Plaza Hotel Voice Assistant",
+    "instructions": "You are a helpful customer service representative for Grand Plaza Hotel. You can help customers with:\n\n- Room reservations and availability\n- Hotel amenities and services\n- Check-in and check-out procedures\n- Dining options and reservations\n- Loyalty program (Grand Rewards) information\n- Special services and events\n- Booking modifications and cancellations\n- General hotel information\n\nWhen customers ask about room availability or reservations, use the appropriate tools to get real-time information. When they ask about hotel policies or services, use the knowledge base tool. Be friendly, professional, and helpful. If you need to look up information, let the customer know you're checking our systems for them.\n\nFor urgent matters or complex issues, always offer to connect them with our reservations team at +1-800-GRAND-PLAZA.",
+    "personality": {
+      "tone": "professional",
+      "language": "English",
+      "responseStyle": "conversational"
+    },
+    "capabilities": [
+      "Room reservations and availability",
+      "Hotel amenities and services",
+      "Check-in and check-out procedures",
+      "Dining options and reservations",
+      "Loyalty program information",
+      "Special services and events",
+      "Booking modifications and cancellations",
+      "General hotel information"
+    ],
+    "fallbackMessage": "I'm sorry, I couldn't find that information. Please contact our reservations team at +1-800-GRAND-PLAZA for assistance."
+  },
+  "tools": []
+}
