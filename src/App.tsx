@@ -38,20 +38,6 @@ function App() {
     try {
       console.log('🔑 Generating ephemeral token from backend...')
       setStatus('Generating ephemeral token...')
-      
-      // const response = await fetch('http://localhost:3001/api/generate-ephemeral-token', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // })
-      // console.log('🔧 Response:', response)
-      // if (!response.ok) {
-      //   const errorData = await response.json()
-      //   throw new Error(errorData.error || 'Failed to generate ephemeral token')
-      // }
-
-      // const data = await response.json()
 
       const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
         method: 'POST',
