@@ -16,7 +16,8 @@ function App() {
   const [enterpriseConfig, setEnterpriseConfig] = useState<EnterpriseVoiceAgentConfig | null>(null)
   const [session, setSession] = useState<RealtimeSession | null>(null)
   const [status, setStatus] = useState('Disconnected')
-  
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+
   // Debug: Log component initialization
   console.log('🚀 App component initialized')
   console.log('📊 Current state:', { setupMode, useFileLoader, isConnected })
@@ -38,24 +39,42 @@ function App() {
       console.log('🔑 Generating ephemeral token from backend...')
       setStatus('Generating ephemeral token...')
       
-      const response = await fetch('http://localhost:3001/api/generate-ephemeral-token', {
+      // const response = await fetch('http://localhost:3001/api/generate-ephemeral-token', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      // })
+      // console.log('🔧 Response:', response)
+      // if (!response.ok) {
+      //   const errorData = await response.json()
+      //   throw new Error(errorData.error || 'Failed to generate ephemeral token')
+      // }
+
+      // const data = await response.json()
+
+      const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate ephemeral token')
-      }
+        body: JSON.stringify({
+          session: {
+            type: 'realtime',
+            model: 'gpt-realtime'
+          }
+        })
+      });
 
       const data = await response.json()
-      setEphemeralToken(data.ephemeralToken)
+
+      console.log('🔧 Data:', data)
+      setEphemeralToken(data.value)
       console.log('✅ Ephemeral token generated successfully')
       setStatus('Ephemeral token ready')
       
-      return data.ephemeralToken
+      return data.value
     } catch (error) {
       console.error('❌ Error generating ephemeral token:', error)
       setStatus('Failed to generate token')
