@@ -15,6 +15,18 @@ export interface EnterpriseInfo {
     whatsapp?: string;
     chat?: string;
   };
+  sipConfig?: SIPConfig;
+}
+
+export interface SIPConfig {
+  enabled: boolean;
+  phoneNumber: string;
+  sipProvider: 'twilio' | 'vonage' | 'custom';
+  sipUri: string;
+  webhookUrl: string;
+  projectId: string;
+  instructions: string;
+  voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 }
 
 export interface APIConfig {

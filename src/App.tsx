@@ -2,17 +2,19 @@ import { useState, useEffect } from 'react'
 import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime'
 import { EnterpriseFileLoader } from './framework/EnterpriseFileLoader'
 import { EnterpriseSetupWizard } from './framework/EnterpriseSetupWizard'
+import { LandingPage } from './components/LandingPage'
 import './App.css'
 
 // Use any type to avoid complex type conflicts
 type EnterpriseVoiceAgentConfig = any;
 
 function App() {
-  const [setupMode, setSetupMode] = useState(true)
+  const [showLanding, setShowLanding] = useState(true)
+  const [setupMode, setSetupMode] = useState(false)
   const [useFileLoader, setUseFileLoader] = useState(true)
   const [isConnected, setIsConnected] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
-  const [ephemeralToken, setEphemeralToken] = useState('')
+  const [, setEphemeralToken] = useState('')
   const [enterpriseConfig, setEnterpriseConfig] = useState<EnterpriseVoiceAgentConfig | null>(null)
   const [session, setSession] = useState<RealtimeSession | null>(null)
   const [status, setStatus] = useState('Disconnected')
@@ -147,7 +149,13 @@ function App() {
     disconnect()
     setEnterpriseConfig(null)
     setSetupMode(true)
+    setShowLanding(false)
     console.log('🔄 Returning to setup mode')
+  }
+
+  const handleGetStarted = () => {
+    setShowLanding(false)
+    setSetupMode(true)
   }
 
   // Cleanup effect for session
@@ -161,76 +169,54 @@ function App() {
   }, [session])
 
   // Debug: Log render decision
-  console.log('🎨 Rendering:', setupMode ? 'Setup Mode' : 'Main App')
+  console.log('🎨 Rendering:', showLanding ? 'Landing Page' : setupMode ? 'Setup Mode' : 'Main App')
+
+  if (showLanding) {
+    return <LandingPage onGetStarted={handleGetStarted} />
+  }
 
   if (setupMode) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        <div style={{ width: '100%', maxWidth: '800px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ color: 'white', marginBottom: '10px', fontSize: '2.5rem' }}>
-              🎤 Enterprise Voice Assistant Framework
-            </h1>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem' }}>
-              Choose how you'd like to configure your voice assistant
-            </p>
+      <div className="setup-mode">
+        <div className="setup-container">
+          <div className="setup-header">
+            <h1>🎤 Enterprise Voice Assistant Framework</h1>
+            <p>Choose how you'd like to configure your voice assistant</p>
           </div>
           
-          <div style={{ 
-            display: 'flex', 
-            gap: '20px', 
-            justifyContent: 'center',
-            marginBottom: '30px'
-          }}>
+          <div className="setup-options">
             <button
               onClick={() => setUseFileLoader(true)}
-              style={{
-                padding: '20px 30px',
-                backgroundColor: useFileLoader ? '#007bff' : 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                transition: 'all 0.3s',
-                minWidth: '200px'
-              }}
+              className={`setup-option ${useFileLoader ? 'active' : ''}`}
             >
-              📁 Load from File
+              <div className="option-icon">📁</div>
+              <div className="option-title">Load from File</div>
+              <div className="option-description">Upload an existing configuration JSON file</div>
             </button>
             
             <button
-              onClick={() => setUseFileLoader(false)}
-              style={{
-                padding: '20px 30px',
-                backgroundColor: !useFileLoader ? '#28a745' : 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                transition: 'all 0.3s',
-                minWidth: '200px'
+              onClick={() => {
+                console.log('🔧 Setup Wizard clicked');
+                setUseFileLoader(false);
               }}
+              className={`setup-option ${!useFileLoader ? 'active' : ''}`}
             >
-              🔧 Setup Wizard
+              <div className="option-icon">🔧</div>
+              <div className="option-title">Setup Wizard</div>
+              <div className="option-description">Create configuration step by step</div>
             </button>
           </div>
           
-          {useFileLoader ? (
-            <EnterpriseFileLoader onConfigLoaded={handleConfigLoaded} />
-          ) : (
-            <EnterpriseSetupWizard onConfigComplete={handleConfigComplete} />
-          )}
+          <div className="setup-content">
+            {useFileLoader ? (
+              <EnterpriseFileLoader onConfigLoaded={handleConfigLoaded} />
+            ) : (
+              <>
+                {console.log('🎨 Rendering EnterpriseSetupWizard')}
+                <EnterpriseSetupWizard onConfigComplete={handleConfigComplete} />
+              </>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -259,8 +245,42 @@ function App() {
             <li><strong>APIs:</strong> {enterpriseConfig?.apis?.length || 0} configured</li>
             <li><strong>Knowledge Base:</strong> {enterpriseConfig?.knowledgeBase?.documents?.length || 0} documents</li>
             <li><strong>Capabilities:</strong> {enterpriseConfig?.voiceAgent?.capabilities?.length || 0} features</li>
+            {enterpriseConfig?.enterprise.sipConfig?.enabled && (
+              <li><strong>📞 SIP Calls:</strong> Enabled ({enterpriseConfig.enterprise.sipConfig.phoneNumber})</li>
+            )}
           </ul>
         </div>
+
+        {enterpriseConfig?.enterprise.sipConfig?.enabled && (
+          <div style={{ 
+            backgroundColor: '#e6f3ff', 
+            padding: '20px', 
+            borderRadius: '8px',
+            marginBottom: '20px',
+            textAlign: 'left',
+            border: '2px solid #b3d9ff'
+          }}>
+            <h3 style={{ marginTop: 0, color: '#2c5282' }}>📞 SIP Phone Call Integration Active!</h3>
+            <p style={{ color: '#2c5282', marginBottom: '15px' }}>
+              Your voice assistant is ready to receive phone calls at: <strong>{enterpriseConfig.enterprise.sipConfig.phoneNumber}</strong>
+            </p>
+            <div style={{ backgroundColor: '#f7fafc', padding: '15px', borderRadius: '6px', marginBottom: '15px' }}>
+              <h4 style={{ marginTop: 0, color: '#2d3748' }}>📋 SIP Setup Status:</h4>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: '#2d3748' }}>
+                <li>✅ Phone number configured: {enterpriseConfig.enterprise.sipConfig.phoneNumber}</li>
+                <li>✅ SIP provider: {enterpriseConfig.enterprise.sipConfig.sipProvider}</li>
+                <li>✅ Voice: {enterpriseConfig.enterprise.sipConfig.voice}</li>
+                <li>✅ Instructions: {enterpriseConfig.enterprise.sipConfig.instructions}</li>
+                <li>⚠️ Configure SIP trunk to point to: <code>sip:proj_5n75yaXMrNWkTQUCR660jbl6@sip.api.openai.com;transport=tls</code></li>
+                <li>⚠️ Set up webhook at platform.openai.com</li>
+              </ul>
+            </div>
+            <p style={{ color: '#2c5282', fontSize: '0.9rem', margin: 0 }}>
+              <strong>Next Steps:</strong> Configure your SIP provider to route calls to the OpenAI SIP endpoint, 
+              and set up the webhook to receive incoming call notifications.
+            </p>
+          </div>
+        )}
 
         <div className="status">
           <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
@@ -320,11 +340,40 @@ function App() {
             <li>Allow microphone access when prompted</li>
             <li>Start speaking naturally - the assistant will respond with voice</li>
             <li>The assistant can help with {enterpriseConfig?.voiceAgent?.capabilities?.join(', ').toLowerCase() || 'various tasks'}</li>
+            {enterpriseConfig?.enterprise.sipConfig?.enabled && (
+              <li>📞 Customers can also call {enterpriseConfig.enterprise.sipConfig.phoneNumber} to speak with the voice assistant</li>
+            )}
           </ol>
+          
+          {enterpriseConfig?.enterprise.sipConfig?.enabled && (
+            <div style={{ 
+              backgroundColor: '#fff3cd', 
+              padding: '15px', 
+              borderRadius: '8px',
+              marginBottom: '20px',
+              border: '1px solid #ffeaa7'
+            }}>
+              <h4 style={{ marginTop: 0, color: '#856404' }}>📞 SIP Phone Call Setup:</h4>
+              <ol style={{ color: '#856404', marginBottom: '10px' }}>
+                <li>Purchase a phone number from your SIP provider ({enterpriseConfig.enterprise.sipConfig.sipProvider})</li>
+                <li>Configure your SIP trunk to point to: <code>sip:proj_5n75yaXMrNWkTQUCR660jbl6@sip.api.openai.com;transport=tls</code></li>
+                <li>Set up a webhook at platform.openai.com pointing to: <code>http://your-domain.com/api/sip/webhook</code></li>
+                <li>Your voice assistant will automatically handle incoming calls</li>
+              </ol>
+              <p style={{ color: '#856404', fontSize: '0.9rem', margin: 0 }}>
+                <strong>Note:</strong> Replace $PROJECT_ID with your OpenAI project ID and your-domain.com with your server URL.
+              </p>
+            </div>
+          )}
+          
           <p>
             <strong>Need help?</strong> Check out the{' '}
             <a href="https://platform.openai.com/docs/guides/realtime" target="_blank" rel="noopener noreferrer">
               OpenAI Realtime API documentation
+            </a>
+            {' '}and{' '}
+            <a href="https://platform.openai.com/docs/guides/realtime/sip" target="_blank" rel="noopener noreferrer">
+              SIP integration guide
             </a>
             {' '}for more information.
           </p>
@@ -350,6 +399,9 @@ function App() {
               <li><strong>Email:</strong> {enterpriseConfig?.enterprise.contactInfo?.email}</li>
               {enterpriseConfig?.enterprise.contactInfo?.whatsapp && (
                 <li><strong>WhatsApp:</strong> {enterpriseConfig.enterprise.contactInfo.whatsapp}</li>
+              )}
+              {enterpriseConfig?.enterprise.sipConfig?.enabled && (
+                <li><strong>📞 SIP Phone:</strong> {enterpriseConfig.enterprise.sipConfig.phoneNumber}</li>
               )}
             </ul>
           </div>

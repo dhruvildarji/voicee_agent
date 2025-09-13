@@ -34,7 +34,17 @@ export class EnterpriseConfigManager {
           email: enterpriseInfo.email,
           whatsapp: enterpriseInfo.whatsapp,
           chat: enterpriseInfo.chat
-        }
+        },
+        sipConfig: enterpriseInfo.sipEnabled ? {
+          enabled: enterpriseInfo.sipEnabled,
+          phoneNumber: enterpriseInfo.sipPhoneNumber,
+          sipProvider: enterpriseInfo.sipProvider,
+          sipUri: `sip:${process.env.OPENAI_PROJECT_ID || 'PROJECT_ID'}@sip.api.openai.com;transport=tls`,
+          webhookUrl: `${process.env.SERVER_URL || 'https://your-domain.com'}/api/sip/webhook`,
+          projectId: process.env.OPENAI_PROJECT_ID || 'PROJECT_ID',
+          instructions: enterpriseInfo.sipInstructions,
+          voice: enterpriseInfo.sipVoice
+        } : undefined
       },
       apis: enterpriseInfo.apis || [],
       knowledgeBase: {
@@ -103,13 +113,28 @@ export class EnterpriseConfigManager {
    * Generate voice agent instructions based on enterprise info
    */
   private generateInstructions(enterpriseInfo: any, template: any): string {
-    return `You are a helpful customer service representative for ${enterpriseInfo.name}. You can help customers with:
+    let instructions = `You are a helpful customer service representative for ${enterpriseInfo.name}. You can help customers with:
 
 ${template.capabilities.map((cap: string) => `- ${cap}`).join('\n')}
 
 When customers ask questions, use the available tools to get accurate information. Be friendly, professional, and helpful. If you need to look up information, let the customer know you're checking our systems for them.
 
 For urgent matters or complex issues, always offer to connect them with our support team at ${enterpriseInfo.phone}.`;
+
+    // Add SIP-specific instructions if enabled
+    if (enterpriseInfo.sipEnabled) {
+      instructions += `
+
+📞 Phone Call Instructions:
+You are now handling a phone call from a customer. Be especially attentive to:
+- Speak clearly and at a comfortable pace
+- Ask clarifying questions if the customer's request is unclear
+- Offer to transfer them to a human agent if needed
+- Provide your phone number (${enterpriseInfo.sipPhoneNumber}) for future reference
+- Thank them for calling ${enterpriseInfo.name}`;
+    }
+
+    return instructions;
   }
 
   /**
@@ -166,7 +191,9 @@ For urgent matters or complex issues, always offer to connect them with our supp
       apis: this.config.apis.length,
       documents: this.config.knowledgeBase.documents.length,
       capabilities: this.config.voiceAgent.capabilities.length,
-      tools: this.config.tools.length
+      tools: this.config.tools.length,
+      sipEnabled: this.config.enterprise.sipConfig?.enabled || false,
+      sipPhoneNumber: this.config.enterprise.sipConfig?.phoneNumber || null
     };
   }
 }

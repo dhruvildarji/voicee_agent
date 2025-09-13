@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './EnterpriseFileLoader.css';
 
 // Use any type to avoid complex type conflicts
 type EnterpriseVoiceAgentConfig = any;
@@ -206,68 +207,35 @@ export const EnterpriseFileLoader: React.FC<EnterpriseFileLoaderProps> = ({ onCo
   };
 
   return (
-    <div style={{ 
-      maxWidth: '600px', 
-      margin: '0 auto', 
-      padding: '40px 20px',
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1 style={{ color: '#333', marginBottom: '10px' }}>🏢 Load Enterprise Configuration</h1>
-        <p style={{ color: '#666', fontSize: '16px' }}>
-          Select a JSON configuration file to load your enterprise voice assistant
-        </p>
+    <div className="enterprise-file-loader">
+      <div className="file-loader-header">
+        <h1>🏢 Load Enterprise Configuration</h1>
+        <p>Select a JSON configuration file to load your enterprise voice assistant</p>
       </div>
 
-      <div style={{ marginBottom: '30px' }}>
-        <label style={{ 
-          display: 'block', 
-          marginBottom: '10px', 
-          fontWeight: 'bold',
-          color: '#333'
-        }}>
+      <div className="file-upload-area">
+        <label className="file-upload-label">
           Enterprise Configuration File:
         </label>
         
-        <div style={{ 
-          border: '2px dashed #ddd', 
-          borderRadius: '8px', 
-          padding: '20px',
-          textAlign: 'center',
-          backgroundColor: '#f9f9f9',
-          transition: 'border-color 0.3s'
-        }}>
+        <div className="file-drop-zone">
           <input
             type="file"
             accept=".json"
             onChange={handleFileSelect}
-            style={{ display: 'none' }}
+            className="file-input"
             id="config-file-input"
           />
-          <label 
-            htmlFor="config-file-input"
-            style={{
-              cursor: 'pointer',
-              display: 'block',
-              padding: '20px',
-              color: '#666'
-            }}
-          >
+          <label htmlFor="config-file-input" className="file-content">
             {selectedFile ? (
               <div>
-                <div style={{ fontSize: '18px', marginBottom: '8px' }}>📄</div>
-                <div style={{ fontWeight: 'bold', color: '#007bff' }}>
-                  {selectedFile.name}
-                </div>
-                <div style={{ fontSize: '14px', marginTop: '4px' }}>
-                  {(selectedFile.size / 1024).toFixed(1)} KB
-                </div>
+                <span className="file-icon">📄</span>
+                <div className="file-name">{selectedFile.name}</div>
+                <div className="file-size">{(selectedFile.size / 1024).toFixed(1)} KB</div>
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: '24px', marginBottom: '10px' }}>📁</div>
+                <span className="file-icon">📁</span>
                 <div style={{ fontWeight: 'bold' }}>Click to select configuration file</div>
                 <div style={{ fontSize: '14px', marginTop: '4px' }}>
                   or drag and drop a JSON file here
@@ -279,84 +247,49 @@ export const EnterpriseFileLoader: React.FC<EnterpriseFileLoaderProps> = ({ onCo
       </div>
 
       {error && (
-        <div style={{
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          padding: '12px',
-          borderRadius: '6px',
-          marginBottom: '20px',
-          border: '1px solid #f5c6cb'
-        }}>
+        <div className="error-message">
           <strong>Error:</strong> {error}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+      <div className="file-actions">
         <button
           onClick={handleLoadConfig}
           disabled={!selectedFile || isLoading}
-          style={{
-            flex: 1,
-            padding: '12px 24px',
-            backgroundColor: selectedFile && !isLoading ? '#007bff' : '#e9ecef',
-            color: selectedFile && !isLoading ? 'white' : '#666',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: selectedFile && !isLoading ? 'pointer' : 'not-allowed',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }}
+          className="load-button"
         >
-          {isLoading ? 'Loading...' : 'Load Configuration'}
+          {isLoading ? (
+            <>
+              <span className="loading-spinner"></span>
+              Loading...
+            </>
+          ) : (
+            'Load Configuration'
+          )}
         </button>
         
-        <button
-          onClick={downloadTemplate}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }}
-        >
+        <button onClick={downloadTemplate} className="template-button">
           📥 Download Template
         </button>
       </div>
 
-      <div style={{ 
-        backgroundColor: '#e8f4fd', 
-        padding: '20px', 
-        borderRadius: '8px',
-        border: '1px solid #b8daff'
-      }}>
-        <h3 style={{ margin: '0 0 15px 0', color: '#004085' }}>📋 Configuration File Format</h3>
-        <p style={{ margin: '0 0 10px 0', color: '#004085' }}>
-          Your configuration file should be a JSON file containing:
-        </p>
-        <ul style={{ margin: '0', paddingLeft: '20px', color: '#004085' }}>
+      <div className="info-section">
+        <h3>📋 Configuration File Format</h3>
+        <p>Your configuration file should be a JSON file containing:</p>
+        <ul>
           <li><strong>Enterprise Information:</strong> Company name, industry, contact details</li>
           <li><strong>APIs:</strong> Your existing APIs and endpoints</li>
           <li><strong>Knowledge Base:</strong> Documents and policies</li>
           <li><strong>Voice Agent:</strong> Instructions and personality settings</li>
         </ul>
-        <p style={{ margin: '10px 0 0 0', color: '#004085', fontSize: '14px' }}>
+        <p className="info-tip">
           💡 <strong>Tip:</strong> Download the template above to see the exact format required.
         </p>
       </div>
 
-      <div style={{ 
-        marginTop: '20px',
-        padding: '15px',
-        backgroundColor: '#fff3cd',
-        borderRadius: '8px',
-        border: '1px solid #ffeaa7'
-      }}>
-        <h4 style={{ margin: '0 0 8px 0', color: '#856404' }}>🔧 Alternative Setup Methods</h4>
-        <p style={{ margin: '0', color: '#856404', fontSize: '14px' }}>
+      <div className="warning-section">
+        <h4>🔧 Alternative Setup Methods</h4>
+        <p>
           You can also create configurations using the setup wizard or by manually editing JSON files.
           This file loader is perfect for loading pre-configured enterprise setups.
         </p>

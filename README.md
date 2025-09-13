@@ -6,11 +6,13 @@ A customizable voice-powered AI assistant framework that can be configured for a
 
 - **🏢 Enterprise Agnostic**: Configure for any company or industry
 - **🎤 Real-time Voice Interaction**: Uses OpenAI's Realtime API for natural conversations
+- **📞 SIP Phone Integration**: Customers can call your voice assistant directly via phone
 - **📚 Custom Knowledge Base**: Upload company-specific documents and policies
 - **🔧 API Integration**: Connect your existing APIs and services
 - **🎨 Customizable Branding**: Company-specific instructions and personality
 - **⚡ Easy Setup**: 4-step wizard to configure your voice assistant
 - **🔍 Industry Templates**: Pre-configured templates for airlines, hotels, banks, retail, etc.
+- **🌐 Webhook Support**: Automatic call handling and management
 
 ## Quick Start
 
@@ -42,12 +44,45 @@ A customizable voice-powered AI assistant framework that can be configured for a
    - Enter your company information, APIs, and knowledge base
    - Connect and start using your custom voice assistant!
 
+## SIP Phone Integration
+
+This framework supports SIP phone integration, allowing customers to call your voice assistant directly via phone. The system automatically handles incoming calls and provides intelligent responses using your configured enterprise settings.
+
+### SIP Setup Process
+
+1. **Configure SIP in Setup Wizard**: Enable SIP phone calls in Step 2 of the setup wizard
+2. **Purchase Phone Number**: Get a phone number from a SIP provider (Twilio, Vonage, etc.)
+3. **Configure SIP Trunk**: Point your SIP trunk to `sip:$PROJECT_ID@sip.api.openai.com;transport=tls`
+4. **Set Up Webhook**: Configure webhook at platform.openai.com pointing to your server
+5. **Deploy Server**: Deploy your server to handle incoming call webhooks
+
+### SIP Features
+
+- **Automatic Call Handling**: Incoming calls are automatically accepted and routed to your voice assistant
+- **Custom Instructions**: Configure how the assistant should behave during phone calls
+- **Voice Selection**: Choose from multiple voice options (Alloy, Echo, Fable, Onyx, Nova, Shimmer)
+- **Call Management**: Accept, reject, or transfer calls programmatically
+- **Real-time Monitoring**: WebSocket connection for live call monitoring
+
+For detailed setup instructions, see [SIP_SETUP_GUIDE.md](./SIP_SETUP_GUIDE.md).
+
 ## Environment Setup
 
 Create a `.env` file in the root directory:
 
 ```env
+# OpenAI Configuration
 VITE_OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_PROJECT_ID=proj_your_project_id_here
+OPENAI_WEBHOOK_SECRET=your_webhook_secret_here
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# SIP Configuration (Optional)
+SIP_PROVIDER=twilio
+SIP_PHONE_NUMBER=+18001234567
 ```
 
 ## 🔑 Automatic Ephemeral Token Generation
