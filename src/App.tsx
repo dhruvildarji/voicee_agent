@@ -3,6 +3,8 @@ import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime'
 import { EnterpriseFileLoader } from './framework/EnterpriseFileLoader'
 import { EnterpriseSetupWizard } from './framework/EnterpriseSetupWizard'
 import { LandingPage } from './components/LandingPage'
+import { VoiceProviderToggle } from './components/VoiceProviderToggle'
+import { useVapiEnterprise } from './hooks/useVapiEnterprise'
 import './App.css'
 
 // Use any type to avoid complex type conflicts
@@ -19,6 +21,33 @@ function App() {
   const [session, setSession] = useState<RealtimeSession | null>(null)
   const [status, setStatus] = useState('Disconnected')
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+
+  // Vapi configuration
+  const [selectedProvider, setSelectedProvider] = useState<'openai' | 'vapi'>('openai')
+  const vapiPublicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY
+  const vapiAssistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID
+  const vapiBaseUrl = import.meta.env.VITE_VAPI_BASE_URL // Don't set default, let Vapi SDK handle it
+
+  // Vapi hook - only initialize if we have the required config
+  const vapiConfig = vapiPublicKey && vapiAssistantId ? {
+    publicKey: vapiPublicKey,
+    assistantId: vapiAssistantId,
+    baseUrl: vapiBaseUrl,
+    enterpriseConfig
+  } : null
+
+  const {
+    isConnected: vapiConnected,
+    isConnecting: vapiConnecting,
+    status: vapiStatus,
+    connect: vapiConnect,
+    disconnect: vapiDisconnect
+  } = useVapiEnterprise(vapiConfig || {
+    publicKey: '',
+    assistantId: '',
+    baseUrl: vapiBaseUrl,
+    enterpriseConfig: null
+  })
 
   // Debug: Log component initialization
   console.log('🚀 App component initialized')
@@ -77,14 +106,22 @@ function App() {
       return
     }
 
+    if (selectedProvider === 'openai') {
+      await connectToOpenAI()
+    } else if (selectedProvider === 'vapi') {
+      await connectToVapi()
+    }
+  }
+
+  const connectToOpenAI = async () => {
     setIsConnecting(true)
     setStatus('Connecting...')
 
     try {
       console.log('🔌 Connecting to OpenAI Realtime API...')
-      console.log('📋 Enterprise:', enterpriseConfig.enterprise.name)
-      console.log('🛠️ APIs configured:', enterpriseConfig.apis?.length || 0)
-      console.log('📚 Knowledge base documents:', enterpriseConfig.knowledgeBase?.documents?.length || 0)
+      console.log('📋 Enterprise:', enterpriseConfig?.enterprise.name)
+      console.log('🛠️ APIs configured:', enterpriseConfig?.apis?.length || 0)
+      console.log('📚 Knowledge base documents:', enterpriseConfig?.knowledgeBase?.documents?.length || 0)
 
       // Generate ephemeral token automatically
       const token = await generateEphemeralToken()
@@ -92,8 +129,8 @@ function App() {
       console.log('🔧 Creating RealtimeAgent...')
       // Create agent with dynamic configuration
       const agent = new RealtimeAgent({
-        name: enterpriseConfig.voiceAgent?.name || 'Enterprise Assistant',
-        instructions: enterpriseConfig.voiceAgent?.instructions || 'You are a helpful assistant.',
+        name: enterpriseConfig?.voiceAgent?.name || 'Enterprise Assistant',
+        instructions: enterpriseConfig?.voiceAgent?.instructions || 'You are a helpful assistant.',
         voice: 'alloy'
       })
 
@@ -126,8 +163,17 @@ function App() {
     }
   }
 
+  const connectToVapi = async () => {
+    try {
+      await vapiConnect()
+    } catch (error) {
+      console.error('❌ Vapi connection failed:', error)
+      alert(`Vapi connection failed: ${(error as Error).message}`)
+    }
+  }
+
   const disconnect = () => {
-    if (session) {
+    if (selectedProvider === 'openai' && session) {
       try {
         setStatus('Disconnecting...')
         console.log('🔌 Disconnecting from OpenAI Realtime API...')
@@ -141,6 +187,12 @@ function App() {
         setStatus('Disconnected')
         setSession(null)
         setIsConnected(false)
+      }
+    } else if (selectedProvider === 'vapi') {
+      try {
+        vapiDisconnect()
+      } catch (error) {
+        console.error('❌ Error during Vapi disconnect:', error)
       }
     }
   }
@@ -282,31 +334,42 @@ function App() {
           </div>
         )}
 
+        {/* Voice Provider Toggle */}
+        <VoiceProviderToggle 
+          selectedProvider={selectedProvider}
+          onProviderChange={setSelectedProvider}
+          disabled={isConnecting || isConnected || vapiConnecting || vapiConnected}
+          vapiAvailable={!!(vapiPublicKey && vapiAssistantId)}
+        />
+
         <div className="status">
-          <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
-          <span>{status}</span>
+          <div className={`status-indicator ${(selectedProvider === 'openai' ? isConnected : vapiConnected) ? 'connected' : 'disconnected'}`}></div>
+          <span>{selectedProvider === 'openai' ? status : vapiStatus}</span>
         </div>
 
-        {!isConnected ? (
+        {!(selectedProvider === 'openai' ? isConnected : vapiConnected) ? (
           <div className="connection-form">
             <div className="input-group">
               <p style={{ marginBottom: '20px', color: '#666' }}>
-                Click the button below to automatically generate an ephemeral token and connect to the voice assistant.
+                {selectedProvider === 'openai' 
+                  ? 'Click the button below to automatically generate an ephemeral token and connect to the OpenAI voice assistant.'
+                  : 'Click the button below to connect to the Vapi voice assistant using your configured assistant.'
+                }
               </p>
             </div>
             <button
               className="connect-button"
               onClick={connectToVoiceAgent}
-              disabled={isConnecting}
+              disabled={selectedProvider === 'openai' ? isConnecting : vapiConnecting}
             >
-              {isConnecting ? 'Connecting...' : 'Connect to Voice Assistant'}
+              {(selectedProvider === 'openai' ? isConnecting : vapiConnecting) ? 'Connecting...' : `Connect to ${selectedProvider === 'openai' ? 'OpenAI' : 'Vapi'} Voice Assistant`}
             </button>
           </div>
         ) : (
           <div className="voice-controls">
             <div className="voice-status">
               <div className="pulse-indicator"></div>
-              <span>Voice Assistant Active - Start speaking!</span>
+              <span>{selectedProvider === 'openai' ? 'OpenAI' : 'Vapi'} Voice Assistant Active - Start speaking!</span>
             </div>
             <button className="disconnect-button" onClick={disconnect}>
               Disconnect
