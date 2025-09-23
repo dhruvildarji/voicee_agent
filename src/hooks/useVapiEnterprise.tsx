@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import Vapi from '@vapi-ai/web';
-import type { CreateAssistantDTO } from '@vapi-ai/web/dist/api';
 
 interface VapiEnterpriseConfig {
   publicKey: string;
@@ -247,7 +246,7 @@ Enterprise Context:
 
 Please provide helpful, professional assistance while maintaining the company's brand voice and expertise.`;
           
-          const assistantConfig: CreateAssistantDTO = {
+          const assistantConfig: any = {
             name: config.enterpriseConfig?.voiceAgent?.name || 'Enterprise Assistant',
             model: {
               provider: 'openai',
