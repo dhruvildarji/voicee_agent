@@ -292,9 +292,8 @@ app.post('/api/test', (req, res) => {
 // Serve static frontend (production)
 app.use(express.static(distPath));
 
-// Fallback to index.html for SPA routes (after API routes)
-app.get('*', (req, res) => {
-  // Avoid hijacking API routes
+// Fallback to index.html for SPA routes (exclude /api/*)
+app.get(/^(\/((?!api\/).).*)?$/, (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
   res.sendFile(path.join(distPath, 'index.html'));
 });
