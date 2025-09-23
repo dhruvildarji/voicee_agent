@@ -1,3 +1,50 @@
+Production deployment and mobile install guide
+
+1) Build and run locally
+
+```bash
+cp env.example .env
+# edit .env and set OPENAI_API_KEY
+npm ci
+npm run build
+npm start
+```
+
+2) Docker deployment
+
+```bash
+docker build -t voice-agent:latest .
+docker run -p 3001:3001 \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  --name voice-agent voice-agent:latest
+```
+
+3) Cloud deployment (one-box)
+
+- Provision a VM with Node.js 20 or use the provided Dockerfile
+- Set environment variable `OPENAI_API_KEY`
+- Reverse proxy with HTTPS (Caddy, Nginx, or a managed load balancer)
+
+Example with Caddy (recommended):
+
+```
+your-domain.com {
+  reverse_proxy localhost:3001
+}
+```
+
+4) Mobile installation (PWA)
+
+- Visit https://your-domain.com on your phone
+- Add to Home Screen (Chrome on Android, Safari on iOS)
+- App runs standalone and caches basic assets
+
+5) Health and webhooks
+
+- Health: GET /api/health
+- SIP webhook: POST /api/sip/webhook
+- Token: POST /api/token
+
 # 🎤 Enterprise Voice Assistant Framework - Professional Setup
 
 ## Overview

@@ -38,6 +38,13 @@ A customizable voice-powered AI assistant framework that can be configured for a
    npm run dev
    ```
 
+5. **Production Build & Start**
+   ```bash
+   npm run build
+   npm start
+   ```
+   The server will serve the built frontend and expose API endpoints at `/api/*`.
+
 5. **Configure Your Enterprise**
    - Open your browser to `http://localhost:5173`
    - Follow the 4-step setup wizard
@@ -112,7 +119,13 @@ The voice assistant now automatically generates ephemeral client tokens using yo
    npm run dev:full
    ```
 
-The backend server will automatically generate ephemeral tokens when you connect to the voice assistant, using your OpenAI API key securely from the server environment.
+The backend server automatically generates ephemeral tokens at `POST /api/token` and the frontend calls this endpoint. Never expose your API key in the browser.
+
+## PWA install on your phone
+
+- Open the deployed URL in Chrome (Android) or Safari (iOS).
+- Use "Add to Home Screen". The app will install and run standalone.
+- Requirements: site must be served over HTTPS and be publicly reachable.
 
 **Important**: Your OpenAI API key must have access to the Realtime API. Make sure your account has the necessary permissions.
 

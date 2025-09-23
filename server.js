@@ -2,11 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import WebSocket from 'ws';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, 'dist');
 
 // Middleware
 app.use(cors());
@@ -22,6 +27,41 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(500).json({ error: err.message });
+});
+
+// Generate ephemeral client token for Realtime API (server-side using API key)
+app.post('/api/token', async (req, res) => {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OPENAI_API_KEY is not configured on the server' });
+    }
+
+    const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session: {
+          type: 'realtime',
+          model: 'gpt-realtime'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Failed to create client secret:', response.status, errorText);
+      return res.status(500).json({ error: 'Failed to create client secret' });
+    }
+
+    const data = await response.json();
+    return res.json({ value: data.value, expires_at: data.expires_at });
+  } catch (error) {
+    console.error('❌ Token endpoint error:', error);
+    return res.status(500).json({ error: 'Token endpoint failed', details: error.message });
+  }
 });
 
 // SIP Webhook handler for incoming calls
@@ -249,11 +289,22 @@ app.post('/api/test', (req, res) => {
   res.json({ message: 'Test endpoint works!' });
 });
 
+// Serve static frontend (production)
+app.use(express.static(distPath));
+
+// Fallback to index.html for SPA routes (after API routes)
+app.get('*', (req, res) => {
+  // Avoid hijacking API routes
+  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Voice Agent Backend Server running on port ${PORT}`);
   console.log(`📞 SIP webhook endpoint: http://localhost:${PORT}/api/sip/webhook`);
   console.log(`📞 SIP call management: http://localhost:${PORT}/api/sip/calls/:callId/refer`);
   console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`🌐 Serving frontend from: ${distPath}`);
 });
 

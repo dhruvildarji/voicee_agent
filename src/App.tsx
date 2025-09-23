@@ -20,7 +20,6 @@ function App() {
   const [enterpriseConfig, setEnterpriseConfig] = useState<EnterpriseVoiceAgentConfig | null>(null)
   const [session, setSession] = useState<RealtimeSession | null>(null)
   const [status, setStatus] = useState('Disconnected')
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
 
   // Vapi configuration
   const [selectedProvider, setSelectedProvider] = useState<'openai' | 'vapi'>('openai')
@@ -70,19 +69,7 @@ function App() {
       console.log('🔑 Generating ephemeral token from backend...')
       setStatus('Generating ephemeral token...')
 
-      const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session: {
-            type: 'realtime',
-            model: 'gpt-realtime'
-          }
-        })
-      });
+      const response = await fetch('/api/token', { method: 'POST' })
 
       const data = await response.json()
 
@@ -280,7 +267,7 @@ function App() {
         <h1>🎤 {enterpriseConfig?.enterprise.name} Voice Assistant</h1>
         <p className="description">
           Welcome to the {enterpriseConfig?.enterprise.name} voice assistant. 
-          This assistant can help you with {enterpriseConfig?.voiceAgent.capabilities?.join(', ').toLowerCase() || 'various tasks'}.
+          This assistant can help you with {(enterpriseConfig?.voiceAgent?.capabilities?.join(', ') || 'various tasks').toLowerCase()}.
         </p>
 
         <div style={{ 
